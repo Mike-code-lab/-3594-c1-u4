@@ -1,0 +1,75 @@
+# φόρτωση βιβλιοθηκών
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score,
+f1_score, confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pylab import rcParams
+%matplotlib inline
+# έλεγχος κατανομής κλάσεων
+sns.set(style='whitegrid', palette='muted', font_scale=1.5)
+rcParams['figure.figsize'] = 14, 8
+RANDOM_SEED = 42
+LABELS = ["Normal", "Fraud"]
+# φόρτωση συνόλου δεδομένων
+url = "https://raw.githubusercontent.com/nsethi31/Kaggle-Data-Credit-Card-FraudDetection/master/creditcard.csv"
+data = pd.read_csv(url)
+# διαγραφή κενών ή μη αριθμητικών τιμών
+data = data.select_dtypes(include=['float64', 'int64']).dropna()
+# διαχωρισμός ανεξάρτητων και εξαρτημένων μεταβλητών
+X = data.drop('Class', axis=1)
+y = data['Class']
+# διαχωρισμός συνόλου δεδομένων σε σύνολο εκπαίδευσης και δοκιμών
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
+random_state=RANDOM_SEED)
+# κατανομή της εξαρτημένης μεταβλητής (class)
+count_classes = pd.value_counts(data['Class'], sort=True)
+count_classes.plot(kind='bar', rot=0)
+plt.title("Transaction class distribution")
+plt.xticks(range(2), LABELS)
+plt.xlabel("Class")
+plt.ylabel("Frequency")
+plt.show()
+# δημιουργία Random Forest αλγορίθμου
+model = RandomForestClassifier(random_state=RANDOM_SEED)
+# εκπαίδευση αλγόριθμου
+model.fit(X_train, y_train)
+# πρόβλεψη συνόλου δοκιμής
+y_pred = model.predict(X_test)
+# υπολογισμός μετρικών αξιολόγησης (accuracy, precision, recall, f-score,
+confusion matrix)
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred)
+recall = recall_score(y_test, y_pred)
+f1 = f1_score(y_test, y_pred)
+cm = confusion_matrix(y_test, y_pred)
+print(f"Accuracy: {accuracy}")
+print(f"Precision: {precision}")
+print(f"Recall: {recall}")
+print(f"F1-Score: {f1}")
+print(f"Confusion Matrix:\n{cm}")
+Το διάγραμμα της κατανομής της εξαρτημένης μεταβλητής (Class) δείχνει ότι οι
+συναλλαγές είναι έντονα ανισοκατανεμημένες, με τις κανονικές συναλλαγές να
+υπερισχύουν των απάτης. Αυτό μπορεί να προκαλέσει προβλήματα στην εκπαίδευση των
+μοντέλων, καθώς το μοντέλο μπορεί να τείνει να προβλέπει πιο συχνά την
+πλειοψηφική τάξη (κανονικές συναλλαγές), παραμελώντας την μειοψηφική τάξη
+(απάτη).
+Αποτελέσματα και Ερμηνεία
+Ακρίβεια (Accuracy): Αν και η ακρίβεια είναι υψηλή, αυτό δεν σημαίνει ότι το
+μοντέλο είναι αποτελεσματικό στην ανίχνευση απάτης, δεδομένης της ανισοκατανομής
+των τάξεων.
+Ακρίβεια (Precision): Η ακρίβεια για τις απάτες δείχνει το ποσοστό των
+πραγματικών απάτων που εντοπίστηκαν σε σχέση με τα συνολικά προβλεπόμενα απάτης.
+Ανάκληση (Recall): Η ανάκληση μετράει το ποσοστό των πραγματικών απάτων που
+εντοπίστηκαν από το σύνολο των πραγματικών απάτων.
+F1-Score: Ο συνδυασμός ακρίβειας και ανάκλησης σε έναν μετρικό δείκτη, ο οποίος
+είναι χρήσιμος όταν έχουμε ανισοκατανομή.
+Πίνακας Σύγχυσης (Confusion Matrix): Παρέχει λεπτομέρειες για τις σωστές και
+λάθος προβλέψεις για κάθε τάξη.
+Με αυτά τα αποτελέσματα μπορούμε να αξιολογήσουμε τη συνολική απόδοση του
+μοντέλου και να κατανοήσουμε πώς χειρίζεται την κατηγορία της απάτης σε σχέση με
+τις κανονικές συναλλαγές. Για την βελτίωση του μοντέλου, μπορεί να χρειαστεί να
+εξετάσουμε τεχνικές όπως η εξισορρόπηση τάξεων, η χρήση υπερπαραμετροποίησης ή
+άλλων αλγορίθμων.
